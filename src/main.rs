@@ -185,3 +185,37 @@ fn mse(preds: &[f64], acts: &[f64]) -> f64 {
     }
     preds.iter().zip(acts.iter()).map(|(p,a)| (p-a).powi(2)).sum::<f64>() / preds.len() as f64
 }
+
+fn main() {
+    let fp = "./Egypt-Used-Car-Price.csv";
+    let data = load_csv(fp);
+
+    if data.is_empty() {
+        eprint!("empty data\n");
+        return;
+    }
+
+    let Kilometers: Vec<f64> = data.iter().map(|(k,_,_,_)| *k).collect();
+    let Year: Vec<f64> = data.iter().map(|(_,y,_,_)| *y).collect();
+    let Engine: Vec<f64> = data.iter().map(|(_,_,e,_)| *e).collect();
+    let Price: Vec<f64> = data.iter().map(|(_,_,_,p)| *p).collect();
+
+    println!("Stats:");
+    println!("Kilometers: mean={:.2}, sd={:.2}", avg(&Kilometers), sd(&Kilometers));
+    println!("Year: mean={:.2}, sd={:.2}", avg(&Year), sd(&Year));
+    println!("Engine: mean={:.2}, sd={:.2}", avg(&Engine), sd(&Engine));
+    println!("Price: mean={:.2}, sd={:.2}", avg(&Price), sd(&Price));
+
+    println!("Correlation:");
+    println!("Kilometers-Price: {:.2}", correlation(&Kilometers,&Price));
+    println!("Year-Price: {:.2}", correlation(&Year,&Price));
+    println!("Engine-Price: {:.2}", correlation(&Engine,&Price));
+
+    let (intercept, slope_km, slope_y, slope_e) = fit_linreg(&data);
+    println!("Model: Price = {:.4} + {:.4}*Kilometers + {:.4}*Year + {:.4}*Engine",
+        intercept, slope_km, slope_y, slope_e);
+
+    let preds: Vec<f64> = data.iter().map(|(k,y,e,_)| pred(*k,*y,*e,intercept,slope_km,slope_y,slope_e)).collect();
+    let err = mse(&preds, &Price);
+    println!("MSE: {:.4}", err);
+}
