@@ -56,6 +56,7 @@ fn load_csv(fp: &str) -> Vec<(f64, f64, f64, f64)> {
 
     data
 }
+
 fn is_num(v: &str) -> bool {
     v.parse::<f64>().is_ok()
 }
@@ -64,4 +65,30 @@ fn rl<P>(file: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where P: AsRef<Path> {
     let f = File::open(file)?;
     Ok(io::BufReader::new(f).lines())
+}
+
+fn avg(d: &[f64]) -> f64 {
+    if d.is_empty() { 0.0 } else { d.iter().sum::<f64>() / d.len() as f64 }
+}
+
+fn sd(d: &[f64]) -> f64 {
+    if d.len() < 2 {
+        0.0
+    } else {
+        let m = avg(d);
+        let var = d.iter().map(|x| (x - m).powi(2)).sum::<f64>() / d.len() as f64;
+        var.sqrt()
+    }
+}
+
+fn correlation(x: &[f64], y: &[f64]) -> f64 {
+    if x.len() != y.len() || x.is_empty() {
+        return 0.0;
+    }
+    let mx = avg(x);
+    let my = avg(y);
+    let num: f64 = x.iter().zip(y.iter()).map(|(xi, yi)| (xi - mx)*(yi - my)).sum();
+    let dx = x.iter().map(|xi| (xi - mx).powi(2)).sum::<f64>().sqrt();
+    let dy = y.iter().map(|yi| (yi - my).powi(2)).sum::<f64>().sqrt();
+    if dx == 0.0 || dy == 0.0 {0.0} else { num / (dx*dy) }
 }
