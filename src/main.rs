@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use ndarray::{Array2, Array1};
 
 fn load_csv(fp: &str) -> Vec<(f64, f64, f64, f64)> {
     let mut data = Vec::new();
@@ -15,7 +16,6 @@ fn load_csv(fp: &str) -> Vec<(f64, f64, f64, f64)> {
     if let Ok(lines) = rl(fp) {
         for (i, l) in lines.enumerate() {
             if let Ok(rec) = l {
-                // Skip header
                 if i == 0 {
                     continue;
                 }
