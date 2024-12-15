@@ -174,3 +174,14 @@ fn fit_linreg(data: &[(f64, f64, f64, f64)]) -> (f64, f64, f64, f64) {
         (0.0,0.0,0.0,0.0)
     }
 }
+
+fn pred(km: f64, yr: f64, eng: f64, i: f64, skm: f64, sy: f64, se: f64) -> f64 {
+    i + skm*km + sy*yr + se*eng
+}
+
+fn mse(preds: &[f64], acts: &[f64]) -> f64 {
+    if preds.len() != acts.len() || preds.is_empty() {
+        return 0.0;
+    }
+    preds.iter().zip(acts.iter()).map(|(p,a)| (p-a).powi(2)).sum::<f64>() / preds.len() as f64
+}
