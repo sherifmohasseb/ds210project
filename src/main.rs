@@ -138,3 +138,39 @@ fn gauss(a: Vec<Vec<f64>>, b: Vec<f64>) -> Vec<f64> {
 
     (0..n).map(|i| aug[i][n]).collect()
 }
+
+fn fit_linreg(data: &[(f64, f64, f64, f64)]) -> (f64, f64, f64, f64) {
+    let n = data.len();
+    if n < 4 {
+        eprint!("not enough data\n");
+        return (0.0,0.0,0.0,0.0);
+    }
+
+    let mut X = Array2::<f64>::zeros((n,4));
+    let mut Y = Array1::<f64>::zeros(n);
+
+    for (i, &(km, yr, eng, pr)) in data.iter().enumerate() {
+        X[[i,0]] = 1.0;
+        X[[i,1]] = km;
+        X[[i,2]] = yr;
+        X[[i,3]] = eng;
+        Y[i] = pr;
+    }
+
+    let xtx = X.t().dot(&X);
+    let xty = X.t().dot(&Y);
+
+    let xtx_vec: Vec<Vec<f64>> = (0..4).map(|i| {
+        (0..4).map(|j| xtx[[i,j]]).collect()
+    }).collect();
+
+    let xty_vec: Vec<f64> = (0..4).map(|i| xty[i]).collect();
+
+    let b = gauss(xtx_vec, xty_vec);
+    if b.len() == 4 {
+        (b[0], b[1], b[2], b[3])
+    } else {
+        eprint!("cannot solve\n");
+        (0.0,0.0,0.0,0.0)
+    }
+}
