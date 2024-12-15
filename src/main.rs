@@ -92,3 +92,49 @@ fn correlation(x: &[f64], y: &[f64]) -> f64 {
     let dy = y.iter().map(|yi| (yi - my).powi(2)).sum::<f64>().sqrt();
     if dx == 0.0 || dy == 0.0 {0.0} else { num / (dx*dy) }
 }
+
+fn gauss(a: Vec<Vec<f64>>, b: Vec<f64>) -> Vec<f64> {
+    let n = a.len();
+    let mut aug = vec![vec![0.0; n+1]; n];
+    for i in 0..n {
+        for j in 0..n {
+            aug[i][j] = a[i][j];
+        }
+        aug[i][n] = b[i];
+    }
+
+    for i in 0..n {
+        let mut pv = i;
+        for r in i+1..n {
+            if aug[r][i].abs() > aug[pv][i].abs() {
+                pv = r;
+            }
+        }
+        if aug[pv][i].abs() < 1e-12 {
+            return vec![];
+        }
+        if pv != i {
+            aug.swap(i, pv);
+        }
+        let pval = aug[i][i];
+        for c in i..n+1 {
+            aug[i][c] /= pval;
+        }
+        for r in i+1..n {
+            let f = aug[r][i];
+            for c in i..n+1 {
+                aug[r][c] -= f * aug[i][c];
+            }
+        }
+    }
+
+    for i in (0..n).rev() {
+        for r in 0..i {
+            let f = aug[r][i];
+            aug[r][n] -= f * aug[i][n];
+            aug[r][i] = 0.0;
+        }
+    }
+
+    (0..n).map(|i| aug[i][n]).collect()
+}
