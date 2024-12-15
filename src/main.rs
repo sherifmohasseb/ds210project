@@ -56,3 +56,12 @@ fn load_csv(fp: &str) -> Vec<(f64, f64, f64, f64)> {
 
     data
 }
+fn is_num(v: &str) -> bool {
+    v.parse::<f64>().is_ok()
+}
+
+fn rl<P>(file: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path> {
+    let f = File::open(file)?;
+    Ok(io::BufReader::new(f).lines())
+}
